@@ -42,7 +42,7 @@ public class NamedQueryToXmlNavigator implements GotoDeclarationHandler {
 			if (refElement == null) {
 				continue;
 			}
-			PsiClass refClass = PsiTreeUtil.getParentOfType(refElement, PsiClass.class);
+			PsiClass refClass = PsiTreeUtil.getParentOfType(refMethod, PsiClass.class);
 			PsiElementProxy psiElementProxy = new PsiElementProxy(refElement, refMethod.getName() + " (" + refClass.getQualifiedName() + ")");
 			if (targets.contains(psiElementProxy)) {
 				continue;

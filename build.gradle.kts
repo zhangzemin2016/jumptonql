@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.skyland"
-version = "1.0.1"
+version = "1.0.3"
 
 repositories {
     mavenLocal()
@@ -22,7 +22,8 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-        create("IC", "2024.2.5")
+        intellijIdeaCommunity("2024.2.5")
+        // local("/home/alger/applications/idea-IC")
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
@@ -34,11 +35,18 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "242"
-            untilBuild = "255"
+            untilBuild = "251.*"
         }
-
         changeNotes = """
-      Initial version
+      <p>
+      Use the new icon <br/>
+      Test compatibility with version 251 <br/>
+      </p>
+      
+      <p>
+      使用新的图标 <br/>
+      使用251版本测试兼容
+      </p>
     """.trimIndent()
     }
 }
