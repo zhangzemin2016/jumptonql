@@ -65,7 +65,7 @@ public class PsiElementProxy implements PsiNamedElement {
 	}
 
 	@Override
-	public @NotNull PsiElement @NotNull [] getChildren() {
+	public @NotNull PsiElement[] getChildren() {
 		return delegate.getChildren();
 	}
 
@@ -135,7 +135,7 @@ public class PsiElementProxy implements PsiNamedElement {
 	}
 
 	@Override
-	public char @NotNull [] textToCharArray() {
+	public char[] textToCharArray() {
 		return delegate.textToCharArray();
 	}
 
@@ -250,7 +250,7 @@ public class PsiElementProxy implements PsiNamedElement {
 	}
 
 	@Override
-	public PsiReference @NotNull [] getReferences() {
+	public PsiReference[] getReferences() {
 		return delegate.getReferences();
 	}
 
