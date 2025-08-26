@@ -21,7 +21,7 @@ import java.util.List;
 public class NamedQueryToXmlNavigator implements GotoDeclarationHandler {
 
 	@Override
-	public PsiElement @Nullable [] getGotoDeclarationTargets(@NotNull PsiElement sourceElement, int offset, Editor editor) {
+	public PsiElement[] getGotoDeclarationTargets(@NotNull PsiElement sourceElement, int offset, Editor editor) {
 		if (!isMethodNameIdentifier(sourceElement)) {
 			return null;
 		}
