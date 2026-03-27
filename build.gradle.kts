@@ -2,11 +2,12 @@ import java.net.URI
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.25"
+    id("org.jetbrains.intellij.platform") version "2.3.0"
 }
 
 group = "com.skyland"
-version = "1.0.5"
+version = "1.0.3"
 
 repositories {
     mavenLocal()
@@ -21,8 +22,9 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-//        intellijIdeaCommunity("2024.2.5")
-        local("C:/Program Files/JetBrains/IntelliJ IDEA 2025.3.4")
+        intellijIdeaCommunity("2024.2.5")
+        // local("/home/alger/applications/idea-IC")
+        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
         bundledPlugin("com.intellij.java")
@@ -30,20 +32,20 @@ dependencies {
 }
 
 intellijPlatform {
-    buildSearchableOptions = false
-    
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "242"
-            untilBuild = "261.*"
+            untilBuild = "251.*"
         }
         changeNotes = """
       <p>
-      Test compatibility with version 261 <br/>
+      Use the new icon <br/>
+      Test compatibility with version 251 <br/>
       </p>
       
       <p>
-      使用261版本测试兼容
+      使用新的图标 <br/>
+      使用251版本测试兼容
       </p>
     """.trimIndent()
     }
@@ -55,5 +57,7 @@ tasks {
         sourceCompatibility = "21"
         targetCompatibility = "21"
     }
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "21"
+    }
 }
-
