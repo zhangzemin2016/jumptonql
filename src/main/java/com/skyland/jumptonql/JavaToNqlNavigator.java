@@ -2,13 +2,10 @@ package com.skyland.jumptonql;
 
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.xml.*;
+import com.intellij.psi.xml.XmlAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +14,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 从 Java DAO 方法跳转到 .nql.xml 文件中对应的 id 属性
+ * 从 Java DAO 方法名跳转到 .nql.xml 文件中对应的 id 属性。
+ * <p>
+ * GotoDeclarationHandler 的 EP 采用"首个非空结果优先"策略（见 GotoDeclarationUtil），
+ * 一旦本 handler 返回非空数组，IDEA 后续的 handler 和"声明或引用"回退逻辑都会被跳过。
+ * 因此需要在返回值中同时包含 nql 目标和方法的引用（调用处），确保弹窗正常展示选项。
  */
 public class JavaToNqlNavigator implements GotoDeclarationHandler {
 
@@ -38,74 +39,31 @@ public class JavaToNqlNavigator implements GotoDeclarationHandler {
 			return null;
 		}
 
+		String methodName = method.getName();
+
+		// 1. 查找 .nql.xml 中 id 等于方法名的属性（本插件核心功能）
+		List<XmlAttribute> idAttrs = NqlFileUtils.findIdAttributes(sourceElement.getProject(), methodName);
+		if (idAttrs.isEmpty()) {
+			// 没有 nql 映射时返回 null，让 IDEA 执行原生逻辑（显示引用等）
+			return null;
+		}
+
 		List<PsiElement> targets = new ArrayList<>();
 
-		// 1. 添加方法引用跳转（原有功能）
+		// nql 目标放在首位
+		for (XmlAttribute idAttr : idAttrs) {
+			targets.add(new NqlNavigationTarget(idAttr, "nql: " + methodName));
+		}
+
+		// 2. 补充方法引用（调用处），保持 IDEA 原有的引用展示
 		Collection<PsiReference> references = ReferencesSearch.search(method).findAll();
 		for (PsiReference reference : references) {
 			PsiElement refElement = reference.getElement();
-			// 跳过方法定义本身
 			if (!refElement.equals(method.getNameIdentifier())) {
 				targets.add(refElement);
 			}
 		}
 
-		// 2. 添加 nql.xml 跳转
-		String methodName = method.getName();
-		GlobalSearchScope scope = GlobalSearchScope.projectScope(sourceElement.getProject());
-		Collection<VirtualFile> xmlFiles = FilenameIndex.getAllFilesByExt(
-				sourceElement.getProject(),
-				"xml",
-				scope
-		);
-
-		for (VirtualFile vf : xmlFiles) {
-			if (!vf.getName().endsWith(".nql.xml")) {
-				continue;
-			}
-			PsiFile psiFile = PsiManager.getInstance(sourceElement.getProject()).findFile(vf);
-			if (psiFile instanceof XmlFile xmlFile) {
-				XmlAttribute idAttr = findIdAttribute(xmlFile, methodName);
-				if (idAttr != null) {
-					// 使用 PsiElementProxy 包装，显示自定义名称 "nql"
-					targets.add(0, new PsiElementProxy(idAttr, "nql: " + methodName));
-				}
-			}
-		}
-
-		return targets.isEmpty() ? null : targets.toArray(new PsiElement[0]);
-	}
-
-	/**
-	 * 在 XML 文件中查找指定 id 值的属性
-	 */
-	private XmlAttribute findIdAttribute(XmlFile xmlFile, String idValue) {
-		XmlDocument doc = xmlFile.getDocument();
-		if (doc == null) {
-            return null;
-        }
-
-		XmlTag rootTag = doc.getRootTag();
-		if (rootTag == null) {
-            return null;
-        }
-
-		return findIdAttributeInTag(rootTag, idValue);
-	}
-
-	private XmlAttribute findIdAttributeInTag(XmlTag tag, String idValue) {
-		XmlAttribute idAttr = tag.getAttribute("id");
-		if (idAttr != null && idValue.equals(idAttr.getValue())) {
-			return idAttr;
-		}
-
-		for (XmlTag subTag : tag.getSubTags()) {
-			XmlAttribute result = findIdAttributeInTag(subTag, idValue);
-			if (result != null) {
-                return result;
-            }
-		}
-
-		return null;
+		return targets.toArray(new PsiElement[0]);
 	}
 }
