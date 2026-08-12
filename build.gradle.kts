@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.skyland"
-version = "1.0.5"
+version = "1.0.7"
 
 repositories {
     mavenLocal()
@@ -22,7 +22,7 @@ repositories {
 dependencies {
     intellijPlatform {
 //        intellijIdeaCommunity("2024.2.5")
-        local("C:/Program Files/JetBrains/IntelliJ IDEA 2025.3.4")
+        local("C:/Program Files/idea")
 
         // Add necessary plugin dependencies for compilation here, example:
         bundledPlugin("com.intellij.java")
@@ -35,11 +35,11 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "242"
-            untilBuild = "261.*"
+            untilBuild = "262.*"
         }
         changeNotes = """
       <p>
-      Test compatibility with version 261 <br/>
+      Test compatibility with version 262 <br/>
       </p>
       
       <p>
